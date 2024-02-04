@@ -5,20 +5,31 @@ import {
   Input,
   InputAdornment,
   MenuItem,
-  Select
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from '@mui/material';
 import { useState } from 'react';
-import { CalculateInterest } from '../components';
+import { PaymentInfo } from '../components';
+import calculateInterest from '../../utils/calculateInterest';
 
 function LoanForm() {
   const [formState, setFormState] = useState({
     currentLoanBalance: '0',
-    interestRate: 3.99,
-    remainingTerms: 0,
-    termPeriods: 'months'
+    interest: 3.99,
+    rate: 'APR',
+    remainingPeriods: 0,
+    termPeriods: 'months',
+    periods: 0
   });
 
   const timePeriods = ['months', 'years'];
+  const rate = ['APR', 'APY'];
 
   function numberWithCommas(x) {
     return x.replace(/,/g, '').replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
@@ -30,12 +41,16 @@ function LoanForm() {
     if (name === 'currentLoanBalance') {
       input = numberWithCommas(input);
     }
+    
     setFormState({
       ...formState,
+      ...paymentInfo,
       [name]: input
     });
   };
-
+  let paymentInfo = calculateInterest(formState);
+  console.log(paymentInfo);
+  let terms = [];
   return (
     <Box sx={{ float: 'left' }}>
       <FormControl variant="standard" sx={{ m: 1, mt: 3, width: '20ch' }}>
@@ -63,7 +78,7 @@ function LoanForm() {
           inputProps={{
             'aria-label': 'percent sign'
           }}
-          value={formState.interestRate}
+          value={formState.interest}
           onChange={handleChange}
         />
         <FormHelperText id="interest-rate-text">
@@ -73,9 +88,9 @@ function LoanForm() {
       <FormControl variant="standard" sx={{ m: 1, mt: 3, width: '10ch' }}>
         <Input
           id="remaining-terms"
-          name="remainingTerms"
+          name="remainingPeriods"
           aria-describedby="terms"
-          value={formState.remainingTerms}
+          value={formState.remainingPeriods}
           onChange={handleChange}
         />
         <FormHelperText id="remaining-terms-text">
@@ -100,12 +115,40 @@ function LoanForm() {
           Select your term period
         </FormHelperText>
       </FormControl>
-      <CalculateInterest
-        currentLoanBalance={formState.currentLoanBalance.replace(/,/g, '')}
-        interestRate={formState.interestRate}
-        remainingTerms={formState.remainingTerms}
-        termPeriods={formState.termPeriods}
+      <PaymentInfo
+        paymentInfo={paymentInfo}
       />
+      {formState.remainingPeriods > 0 ? (
+        <TableContainer
+          component={Paper}
+          sx={{ maxHeight: 500, maxWidth: 650 }}
+        >
+          <Table size="small" aria-label="monthly payment table" stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell>Period</TableCell>
+                <TableCell>Payment</TableCell>
+                <TableCell>Interest</TableCell>
+                <TableCell>Principal</TableCell>
+                <TableCell>Balance</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {terms.map((term, index) => (
+                <TableRow key={index}>
+                  <TableCell>{term.period}</TableCell>
+                  <TableCell>{term.monthlyPayment}</TableCell>
+                  <TableCell>{term.monthlyInterest}</TableCell>
+                  <TableCell>{term.monthlyPrincipal}</TableCell>
+                  <TableCell>{term.currentLoanBalance}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 }

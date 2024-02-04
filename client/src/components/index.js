@@ -1,4 +1,4 @@
 import LoanForm from './LoanForm';
-import CalculateInterest from './CalculateInterest';
+import PaymentInfo from './PaymentInfo';
 
-export { LoanForm, CalculateInterest };
+export { LoanForm, PaymentInfo };
