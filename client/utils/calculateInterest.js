@@ -1,3 +1,5 @@
+import amortizationGenerator from './amortizationGenerator';
+
 let compoundingPeriods = 4;
 const aprToApy = (rate) => {
   let apr = rate / 100;
@@ -5,12 +7,10 @@ const aprToApy = (rate) => {
 };
 const apyToApr = (rate) => {
   let apy = rate / 100;
-  console.log(apy);
   return compoundingPeriods * (Math.pow(1 + apy, 1 / compoundingPeriods) - 1);
 };
 
 export default function calculateInterest(formState) {
-  console.log(formState);
   let currentLoanBalance = formState.currentLoanBalance.replace(/,/g, '');
   let interest = formState.interest;
   let rate = formState.rate;
@@ -44,10 +44,15 @@ export default function calculateInterest(formState) {
   }
 
   return {
-    remainingTerms: remainingPeriods,
     monthlyPayment: monthlyPayment,
     monthlyInterestRate: monthlyInterestRate,
     totalInterest: totalInterest,
-    totalCost: totalCost
+    totalCost: totalCost,
+    ...amortizationGenerator(
+      currentLoanBalance,
+      remainingPeriods,
+      monthlyPayment,
+      monthlyInterestRate
+    )
   };
 }
