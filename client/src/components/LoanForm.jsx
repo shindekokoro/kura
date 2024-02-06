@@ -5,18 +5,11 @@ import {
   Input,
   InputAdornment,
   MenuItem,
-  Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow
+  Select
 } from '@mui/material';
-import { useState } from 'react';
-import { PaymentInfo } from '../components';
-import calculateInterest from '../../utils/calculateInterest';
+import { useEffect, useRef, useState } from 'react';
+import { PaymentInfo, AmortizationTable } from '../components';
+import { calculateInterest } from '../../utils';
 
 function LoanForm() {
   const [formState, setFormState] = useState({
@@ -38,21 +31,28 @@ function LoanForm() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     let input = value;
+
     if (name === 'currentLoanBalance') {
       input = numberWithCommas(input);
     }
-    
-    setFormState({
-      ...formState,
-      ...paymentInfo,
-      [name]: input
+
+    setFormState((prevFormState) => {
+      const updatedFormState = {
+        ...prevFormState,
+        [name]: input
+      };
+
+      const updatedPaymentInfo = calculateInterest(updatedFormState);
+
+      return {
+        ...updatedFormState,
+        ...updatedPaymentInfo
+      };
     });
   };
-  let paymentInfo = calculateInterest(formState);
-  console.log(paymentInfo);
-  let terms = [];
+
   return (
-    <Box sx={{ float: 'left' }}>
+    <Box sx={{ float: 'left', pr:1 }}>
       <FormControl variant="standard" sx={{ m: 1, mt: 3, width: '20ch' }}>
         <Input
           id="current-loan-balance"
@@ -63,26 +63,44 @@ function LoanForm() {
             'aria-label': 'dollar sign'
           }}
           value={formState.currentLoanBalance}
-          onChange={handleChange}
+          onInput={handleChange}
         />
         <FormHelperText id="current-loan-balance-text">
           Starting (current) Loan Balance
         </FormHelperText>
       </FormControl>
-      <FormControl variant="standard" sx={{ m: 1, mt: 3, width: '15ch' }}>
+      <FormControl variant="standard" sx={{ m: 1, mt: 3, width: '8ch' }}>
         <Input
-          id="interest-rate"
-          name="interestRate"
+          id="interest"
+          name="interest"
           endAdornment={<InputAdornment position="end">%</InputAdornment>}
           aria-describedby="percent sign"
           inputProps={{
             'aria-label': 'percent sign'
           }}
           value={formState.interest}
-          onChange={handleChange}
+          onInput={handleChange}
         />
         <FormHelperText id="interest-rate-text">
-          Interest Rate (APR)
+          Interest
+        </FormHelperText>
+      </FormControl>
+      <FormControl variant="standard" sx={{ m: 1, mt: 3, width: '10ch' }}>
+        <Select
+          id="rate-select"
+          name="rate"
+          aria-describedby="rate"
+          value={formState.rate}
+          onChange={handleChange}
+        >
+          {rate.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+        <FormHelperText id="remaining-periods-text">
+          Select your Rate
         </FormHelperText>
       </FormControl>
       <FormControl variant="standard" sx={{ m: 1, mt: 3, width: '10ch' }}>
@@ -91,7 +109,7 @@ function LoanForm() {
           name="remainingPeriods"
           aria-describedby="terms"
           value={formState.remainingPeriods}
-          onChange={handleChange}
+          onInput={handleChange}
         />
         <FormHelperText id="remaining-terms-text">
           Remaining Payments
@@ -115,40 +133,8 @@ function LoanForm() {
           Select your term period
         </FormHelperText>
       </FormControl>
-      <PaymentInfo
-        paymentInfo={paymentInfo}
-      />
-      {formState.remainingPeriods > 0 ? (
-        <TableContainer
-          component={Paper}
-          sx={{ maxHeight: 500, maxWidth: 650 }}
-        >
-          <Table size="small" aria-label="monthly payment table" stickyHeader>
-            <TableHead>
-              <TableRow>
-                <TableCell>Period</TableCell>
-                <TableCell>Payment</TableCell>
-                <TableCell>Interest</TableCell>
-                <TableCell>Principal</TableCell>
-                <TableCell>Balance</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {terms.map((term, index) => (
-                <TableRow key={index}>
-                  <TableCell>{term.period}</TableCell>
-                  <TableCell>{term.monthlyPayment}</TableCell>
-                  <TableCell>{term.monthlyInterest}</TableCell>
-                  <TableCell>{term.monthlyPrincipal}</TableCell>
-                  <TableCell>{term.currentLoanBalance}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      ) : (
-        <></>
-      )}
+      <PaymentInfo formState={formState} />
+      <AmortizationTable formState={formState} setFormState={setFormState} />
     </Box>
   );
 }
