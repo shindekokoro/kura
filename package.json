@@ -1,0 +1,37 @@
+{
+  "name": "kura-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node config/seeds.js",
+    "lint": "eslint client/src --ext js,jsx --report-unused-disable-directives --max-warnings 10",
+    "lint-fix": "eslint client/src --ext js,jsx --report-unused-disable-directives --max-warnings 10 --fix",
+    "fix": "yarn format && yarn lint:fix",
+    "format": "prettier --write 'client/src/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "eslint --fix 'client/src/**/*.{js,jsx,ts,tsx}'",
+    "fix:eslint": "eslint client/src --ext .js,.ts,.jsx,.tsx --fix",
+    "fix:prettier": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "Brian Whisler",
+  "license": "MIT",
+  "dependencies": {
+    "@apollo/server": "^4.10.0",
+    "bcrypt": "^5.1.1",
+    "express": "^4.18.2",
+    "graphql": "^16.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^7.0.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.4",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5"
+  }
+}
